@@ -1,0 +1,78 @@
+<dom-module id="item-exam">
+    <template>
+        <style>
+            :host{
+                display:block;
+            }
+            paper-card{
+                width:100%;
+                margin: 2px 2px 2px 2px;
+            }
+        </style>
+
+        <paper-card 
+            heading = "[[slug]]"
+            elevation="1">
+            
+            <div class="card-content">
+                <div class="primary">
+                    [[title]] - [[timestamp]]
+                </div>
+                <div class="secundary">
+                    [[description]]
+                </div>
+            </div>
+            <div class="card-actions">
+                <paper-button id="editExam"><paper-icon-button icon="create"></paper-icon-button></paper-button>
+                <paper-button id="deleteExam"><paper-icon-button icon="delete"></paper-icon-button></paper-button>
+            </div>
+        </paper-card>
+
+    </template>
+    <script>
+        
+
+        Polymer({
+            is: "item-exam",
+            properties: {
+                slug: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                title: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                description: {
+                    type: String,
+                    value: "",
+                    notify: true
+                
+                },
+                enabled: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                }
+            },
+            listeners: {
+                "editExam.tap": "_editExam",
+                "deleteExam.tap": "_deleteExam"
+            },
+            _editExam: function(snapshot){
+                var p = this.parentNode.$.addExam;
+                p.open();
+                p.querySelector("#title").value = this.title;
+                p.querySelector("#description").value = this.description;
+                p.querySelector("#timestamp").value = this.timestamp;
+                if (this.enabled)
+                    p.querySelector("#enabled").checked = true;
+            },
+            _deleteExam: function(snapshot) {
+                bd.ref("test/" + this.slug).remove();
+            }
+        });
+    </script>
+</dom-module>

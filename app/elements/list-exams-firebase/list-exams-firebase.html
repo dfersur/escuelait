@@ -1,0 +1,109 @@
+<dom-module id="list-exams-firebase">
+<template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <firebase-app
+      name="test"
+      api-key="PAIzaSyCsrlQdDv8czYyKjBxJvtThqUkd-VGsn-Y"
+      auth-domain="examsescuelait.firebaseapp.com"
+      database-url="https://examsescuelait.firebaseio.com">
+    </firebase-app> 
+
+    <firebase-query
+      id="query"
+      app-name="test"
+      path="/test"
+      data="{{examslist}}">
+    </firebase-query>
+    
+    <paper-button on-tap="openForm"><iron-icon icon="add"></iron-icon></paper-button>
+
+    <paper-dialog id="addExam">
+        <h2>Nuevo exámen</h2>
+        <paper-dialog-scrollable>
+            <paper-card>
+                <paper-input label="Título" id="title"></paper-input>
+                <paper-input label="Descripción" id="description"></paper-input>
+                <paper-input label="ej. 1/1/2015" id="timestamp"></paper-input>
+                <paper-checkbox label="Habilitado" id="enabled"></paper-checkbox>
+            </paper-card>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+            <paper-button dialog-dismiss autofocus>Cancelar</paper-button>
+            <paper-button id="btnAddExam">Añadir</paper-button>
+        </div>
+    </paper-dialog>
+
+    <template is="dom-repeat" items="[[examslist]]" as="exam">
+        <item-exam 
+            slug="[[exam.key]]"
+            title="[[exam.title]]"
+            description="[[exam.description]]"
+            timestamp="[[exam.timestamp]]"
+            enabled="[[exam.enabled]]"></item-exam>
+    </template>
+    
+</template>
+<script src="../../bower_components/firebase/firebase.js"></script>
+<script>
+    var config = {
+        apiKey: "AIzaSyCsrlQdDv8czYyKjBxJvtThqUkd-VGsn-Y",
+        authDomain: "examsescuelait.firebaseapp.com",
+        databaseURL: "https://examsescuelait.firebaseio.com",
+        storageBucket: "examsescuelait.appspot.com",
+        messagingSenderId: "1085261772487"
+    };
+    firebase.initializeApp(config);
+    var bd = firebase.database();
+
+    Polymer({
+        is: "list-exams-firebase",
+        properties: {
+            examslist: {
+                notify:true
+            }
+        },
+        listeners:{
+            "btnAddExam.tap": "addExam"
+        },
+        openForm: function(snapshot) {
+            this.$.addExam.open();
+        },
+        addExam: function(snapshot) {
+            var slug = getCleanedString(this.$.title.value).toLowerCase();
+              
+            bd.ref("test/"+ slug).set({
+                title: this.$.title.value,
+                description: this.$.description.value,
+                timestamp: this.$.timestamp.value,
+                enabled: this.$.enabled.checked?true:false
+            });
+            this.$.title.value="";
+            this.$.description.value="";
+            this.$.timestamp.value= "";
+            this.$.enabled.checked=false;
+            this.$.addExam.close();
+        }
+    });
+
+    function getCleanedString(cadena){
+        var specialChars = "!@#$^&%*()+=-[]\/{}|:<>?,.";
+        for (var i = 0; i < specialChars.length; i++) {
+            cadena= cadena.replace(new RegExp("\\" + specialChars[i], 'gi'), '');
+        }   
+        cadena = cadena.toLowerCase();
+        cadena = cadena.replace(/ /g,"-");
+        cadena = cadena.replace(/á/gi,"a");
+        cadena = cadena.replace(/é/gi,"e");
+        cadena = cadena.replace(/í/gi,"i");
+        cadena = cadena.replace(/ó/gi,"o");
+        cadena = cadena.replace(/ú/gi,"u");
+        cadena = cadena.replace(/ñ/gi,"n");
+        return cadena;
+    }
+</script>
+</dom-module>
